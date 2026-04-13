@@ -12,7 +12,15 @@ const schema = a.schema({
       content: a.string(),
     })
     .authorization((allow) => [allow.publicApiKey()]),
-});
+  // 2つ目のテーブルを追加
+  Result: a.model({
+    uhen: a.integer(),
+    saen: a.integer(),
+    siki: a.string(),
+    seikai: a.integer(),
+    answer: a.integer(),
+  }).authorization(allow => [allow.owner()]), // 本人だけが操作できるように設定
+  });
 
 export type Schema = ClientSchema<typeof schema>;
 
