@@ -9,6 +9,7 @@ import outputs from "@/amplify_outputs.json";
 import "@aws-amplify/ui-react/styles.css";
 
 Amplify.configure(outputs);
+const client = generateClient<Schema>();
 
 export default function App() {
 
@@ -31,11 +32,46 @@ export default function App() {
   // 2. Enterキーが押された時の判定処理
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      const isCorrect = Number(userAnswer) === sahen + uhen;
+      const seikai = sahen + uhen;
+      const isCorrect = Number(userAnswer) === seikai;
       setResult(isCorrect ? "正解！" : "残念、不正解...");
+      write(sahen,uhen,'+',seikai,Number(userAnswer));
       setSahen(getRandomInt());
       setUhen(getRandomInt());
     }
+  };
+
+  // 3. 書き込み
+  async function write(p_uhen:number, p_sahen:number, p_siki:string, p_seikai:number, p_answer:number){
+//  const write = (uhen:number, sahen:number, siki:string, seikai:number, answer:number) => {
+
+    const { data: newResult, errors } = await client.models.Result.create({
+      uhen: p_uhen,
+      saen: p_sahen,
+      siki: p_siki,
+      seikai: p_seikai,
+      answer: p_answer,
+      // owner フィールドは自動で入るため、指定不要です
+    });
+  
+    //if (errors) console.error(errors);
+    if (errors) console.log("Result作成失敗");
+    else console.log("Result作成成功:", newResult);
+
+  };
+
+  async function write2(p_uhen:number, p_sahen:number, p_siki:string, p_seikai:number, p_answer:number){
+//  const write = (uhen:number, sahen:number, siki:string, seikai:number, answer:number) => {
+
+    const { data: newResult, errors } = await client.models.Todo.create({
+      content: 'TEST',
+      // owner フィールドは自動で入るため、指定不要です
+    });
+  
+    //if (errors) console.error(errors);
+    if (errors) console.log("Todo作成失敗");
+    else console.log("Todo作成成功:", newResult);
+
   };
 
   return (
