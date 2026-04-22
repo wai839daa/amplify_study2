@@ -55,7 +55,7 @@ export default function App() {
     });
   
     //if (errors) console.error(errors);
-    if (errors) console.log("Result作成失敗");
+    if (errors) console.log("Result作成失敗: " + errors);
     else console.log("Result作成成功:", newResult);
 
   };
