@@ -20,6 +20,13 @@ const schema = a.schema({
     seikai: a.integer(),
     answer: a.integer(),
   }).authorization(allow => [allow.owner()]), // 本人だけが操作できるように設定
+   Result2: a.model({
+    uhen: a.integer(),
+    saen: a.integer(),
+    siki: a.string(),
+    seikai: a.integer(),
+    answer: a.integer(),
+  })
   });
 
 export type Schema = ClientSchema<typeof schema>;
