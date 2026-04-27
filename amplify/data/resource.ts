@@ -26,7 +26,7 @@ const schema = a.schema({
     siki: a.string(),
     seikai: a.integer(),
     answer: a.integer(),
-  })
+  }).authorization(allow => [allow.owner()]), // 本人だけが操作できるように設定
   });
 
 export type Schema = ClientSchema<typeof schema>;
