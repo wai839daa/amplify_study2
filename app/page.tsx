@@ -45,6 +45,12 @@ export default function App() {
   async function write(p_uhen:number, p_sahen:number, p_siki:string, p_seikai:number, p_answer:number){
 //  const write = (uhen:number, sahen:number, siki:string, seikai:number, answer:number) => {
 
+    console.log ('p_uhen==' + p_uhen);
+    console.log (',p_sahen==' + p_sahen);
+    console.log (',p_siki==' + p_uhen);
+    console.log (',p_uhen==' + p_uhen);
+    console.log (',p_seikai==' + p_seikai);
+    console.log (',p_answer==' + p_answer);
     const { data: newResult, errors } = await client.models.Result2.create({
       uhen: p_uhen,
       saen: p_sahen,
@@ -55,7 +61,7 @@ export default function App() {
     });
   
     //if (errors) console.error(errors);
-    if (errors) console.log("Result2_作成失敗: " + errors);
+    if (errors) console.log("Result2_作成失敗:errors== " + errors + ",newResult==" + newResult);
     else console.log("Result2_作成成功:", newResult);
 
   };
