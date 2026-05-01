@@ -47,8 +47,7 @@ export default function App() {
 
     console.log ('p_uhen==' + p_uhen);
     console.log (',p_sahen==' + p_sahen);
-    console.log (',p_siki==' + p_uhen);
-    console.log (',p_uhen==' + p_uhen);
+    console.log (',p_siki==' + p_siki);
     console.log (',p_seikai==' + p_seikai);
     console.log (',p_answer==' + p_answer);
     const { data: newResult, errors } = await client.models.Result2.create({
