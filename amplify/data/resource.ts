@@ -26,8 +26,9 @@ const schema = a.schema({
     siki: a.string(),
     seikai: a.integer(),
     answer: a.integer(),
-  }).authorization(allow => [allow.guest()]), // 誰でも操作できるようにする
-  });
+  //}).authorization(allow => [allow.guest()]), // 誰でも操作できるようにする
+  }).authorization((allow) => [allow.publicApiKey()]),  // Todoと合わせる。
+});
 
 export type Schema = ClientSchema<typeof schema>;
 
