@@ -36,6 +36,7 @@ export default function App() {
       const isCorrect = Number(userAnswer) === seikai;
       setResult(isCorrect ? "正解！" : "残念、不正解...");
       write(sahen,uhen,'+',seikai,Number(userAnswer));
+      write2(sahen,uhen,'+',seikai,Number(userAnswer));
       setSahen(getRandomInt());
       setUhen(getRandomInt());
     }
@@ -66,17 +67,13 @@ export default function App() {
   };
 
   async function write2(p_uhen:number, p_sahen:number, p_siki:string, p_seikai:number, p_answer:number){
-//  const write = (uhen:number, sahen:number, siki:string, seikai:number, answer:number) => {
-
     const { data: newResult, errors } = await client.models.Todo.create({
-      content: 'TEST',
+      content: 'TEST_' + p_uhen + '_' + p_sahen + '_' + p_siki + '_' + p_seikai + '_' + p_answer
       // owner フィールドは自動で入るため、指定不要です
     });
   
-    //if (errors) console.error(errors);
-    if (errors) console.log("Todo作成失敗");
-    else console.log("Todo作成成功:", newResult);
-
+    if (errors) console.log("write2_Toeo_作成失敗:errors== " + errors + ",newResult==" + newResult);
+    else console.log("write2_Todo_作成成功:", newResult);
   };
 
   return (
