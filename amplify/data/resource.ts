@@ -1,4 +1,5 @@
 import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
+import {getServerTime} from '../functions/get-server-time/resources';
 
 /*== STEP 1 ===============================================================
 The section below creates a Todo database table with a "content" field. Try
@@ -20,6 +21,7 @@ const schema = a.schema({
     seikai: a.integer(),
     answer: a.integer(),
   }).authorization(allow => [allow.owner()]), // 本人だけが操作できるように設定
+  // 3つ目のテーブルを追加
    Result2: a.model({
     uhen: a.integer(),
     saen: a.integer(),
@@ -28,6 +30,16 @@ const schema = a.schema({
     answer: a.integer(),
   //}).authorization(allow => [allow.guest()]), // 誰でも操作できるようにする
   }).authorization((allow) => [allow.publicApiKey()]),  // Todoと合わせる。
+  //サーバ時刻取得の戻り値の型を定義
+   ServerTimeResponse: a.customType({
+    time: a.string()
+  }),
+  //サーバ時刻取得関数をフロントから呼び出す、GraphQL の Query を定義し、同関数を紐づける。
+  getServerTime: a
+    .query()
+    .returns(a.ref('ServerTimeResponse'))
+    .authorization((allow) => [allow.publicApiKey()]),  // Todoと合わせる。
+    .handler(a.handler.function(getServerTime)),
 });
 
 export type Schema = ClientSchema<typeof schema>;
@@ -41,6 +53,7 @@ export const data = defineData({
     },
   },
 });
+
 
 /*== STEP 2 ===============================================================
 Go to your frontend source code. From your client-side code, generate a

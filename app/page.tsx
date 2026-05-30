@@ -13,6 +13,83 @@ const client = generateClient<Schema>();
 
 export default function App() {
 
+  //DB内容を取得
+  const [results, setResults] = useState<Array<Schema["Result2"]["type"]>>([]);  
+  async function read(p_time:string){
+    console.log ('p_time==' + p_time);
+    const { data: lists, errors } = await client.models.Result2.list({
+    filter: {
+        createdAt: {
+          gt: p_time // 「指定時刻より大きい（以降）」という条件
+//        gt: startTime // 「指定時刻より大きい（以降）」という条件
+        }
+      }
+    });
+    
+    if (errors) console.log("list関数_失敗:errors== " + errors + ",lists==" + lists);
+    else console.log("list関数_成功:", lists);
+  
+    setResults(lists);
+  };
+
+  //const targetTime = "2026-05-17T12:00:00.000Z"; 
+  const [startTime, setStartTime] = useState<string | null>(null);
+  const [endTime, setEndTime] = useState<string | null>(null);
+
+  //開始ボタン押下の処理
+  //ローカル時刻取得の場合
+  const handleStartClick_local = () => {
+    const targetTime = new Date().toISOString() ;
+    setStartTime(targetTime);
+  };
+
+  //サーバ時刻取得の場合
+  const handleStartClick_server = async () => {
+    try {
+      // DynamoDBではなく、AWSサーバーの関数をダイレクトに呼び出す！
+      const { data, errors } = await client.queries.getServerTime();
+
+      if (errors || !data?.time) {
+        throw new Error();
+      }
+
+      // サーバーから直接返ってきた時刻データ
+      const awsTime = data?.time; // 例: "2026-05-25T12:00:00.000Z"
+      
+      setStartTime(new Date(awsTime).toLocaleTimeString("ja-JP"));
+    } catch (error) {
+      console.error("サーバー時刻の取得に失敗しました:", error);
+    } finally {
+    }
+  };
+
+  //終了ボタン押下の処理
+  const handleEndClick = () => {
+    if (!startTime){ //この判定を入れないと、後のread実行で、null型は不許可のコンパイルエラーとなる。
+      return;
+    }
+    const targetTime = new Date().toISOString() ;
+    setEndTime(targetTime);
+    read(startTime);
+  };
+
+  /*
+  function listResults() {
+  //client.models.Result2.observeQuery().subscribe({
+    client.models.Result2.list({
+      next: (data) => setResults([...data.items]),
+       filter: {
+      createdAt: {
+        gt: targetTime // 「指定時刻より大きい（以降）」という条件
+      }
+    }
+    });
+  }
+  useEffect(() => {
+    listResults();
+  }, []);
+*/
+
   //上限、下限範囲のランダムな整数を返す関数
   const KAGEN:number = 1;
   const JOUGEN:number = 100;
@@ -39,6 +116,7 @@ export default function App() {
       write2(sahen,uhen,'+',seikai,Number(userAnswer));
       setSahen(getRandomInt());
       setUhen(getRandomInt());
+//     read (startTime);
     }
   };
 
@@ -78,7 +156,28 @@ export default function App() {
 
   return (
   <div style={{ padding: '20px' }}>
-    {/* 3. 表示部分 */}
+    <div>
+      <input
+        type="button"
+        value="開始"
+        onClick={handleStartClick_server} // Enterキーを監視
+      />
+      {/* 終了ボタン（開始ボタンが押されるまで無効化） */}
+      <input
+        type="button"
+        value="終了"
+        onClick={handleEndClick} // Enterキーを監視
+      />
+
+      {/* 開始時刻等の表示 */}
+      {startTime && (
+        <p style={{ marginTop: "1.5rem", fontSize: "18px" }}>
+          開始時刻: <strong>{startTime}</strong>
+          {endTime && <p>終了時刻: <strong>{endTime}</strong></p>}
+        </p>
+      )}
+    </div>
+      {/* 3. 表示部分 */}
     <span>{sahen} + {uhen} = </span>
     
     <input
@@ -92,6 +191,13 @@ export default function App() {
     <div style={{ marginTop: '10px', fontWeight: 'bold' }}>
       {result}
     </div>
+  
+     <ul>
+        {results.map((result2) => (
+          <li key={result2.id}>{result2.saen + ' ' + result2.siki + ' ' + result2.uhen + ' = ' + result2.answer + '＜' + result2.seikai + '＞' + ((result2.answer == result2.seikai) ? '正解！' : '残念、不正解')}</li>
+        ))}
+      </ul>
+
   </div>
 );
 
