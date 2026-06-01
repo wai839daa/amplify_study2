@@ -48,6 +48,7 @@ export default function App() {
     try {
       // DynamoDBではなく、AWSサーバーの関数をダイレクトに呼び出す！
       const { data, errors } = await client.queries.getServerTime();
+      console.log("サーバー時刻の取得に成功しました:", "data?.time=" + data?.time);
 
       if (errors || !data?.time) {
         throw new Error();
@@ -57,6 +58,7 @@ export default function App() {
       const awsTime = data?.time; // 例: "2026-05-25T12:00:00.000Z"
       
       setStartTime(new Date(awsTime).toLocaleTimeString("ja-JP"));
+      
     } catch (error) {
       console.error("サーバー時刻の取得に失敗しました:", error);
     } finally {
