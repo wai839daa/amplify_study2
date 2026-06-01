@@ -38,7 +38,7 @@ const schema = a.schema({
   getServerTime: a
     .query()
     .returns(a.ref('ServerTimeResponse'))
-    .authorization((allow) => [allow.publicApiKey()]),  // Todoと合わせる。
+    .authorization((allow) => [allow.publicApiKey()])  // Todoと合わせる。
     .handler(a.handler.function(getServerTime)),
 });
 
