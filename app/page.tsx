@@ -43,6 +43,27 @@ export default function App() {
     setStartTime(targetTime);
   };
 
+  //サーバ時刻取得（開始、終了の共通処理)
+//OK const handleGetServerTime = async (cbfnc:Function) => {  //この書き方でも動くが、大文字のFunctionは、「何でもいいから関数全般」という意味の、非常に大雑把な型で、型安全ではなくなってしまうとのこと。下記がよい。
+  const handleGetServerTime = async (cbfnc:(tm:string)=>void) => {
+    try {
+      // DynamoDBではなく、AWSサーバーの関数をダイレクトに呼び出す！
+      const { data, errors } = await client.queries.getServerTime();
+      console.log("サーバー時刻の取得に成功しました:", "data?.time=" + data?.time);
+
+      if (errors || !data?.time) {
+        throw new Error();
+      }
+
+      // サーバー時刻をコールバック関数で設定する。
+      cbfnc(data?.time);
+      
+    } catch (error) {
+      console.error("サーバー時刻の取得に失敗しました:", error);
+    } finally {
+    }
+  };
+
   //サーバ時刻取得の場合
   const handleStartClick_server = async () => {
     try {
@@ -55,9 +76,9 @@ export default function App() {
       }
 
       // サーバーから直接返ってきた時刻データ
-      const awsTime = data?.time; // 例: "2026-05-25T12:00:00.000Z"
-      
-      setStartTime(new Date(awsTime).toLocaleTimeString("ja-JP"));
+//    const awsTime = data?.time; // 例: "2026-05-25T12:00:00.000Z"
+//    setStartTime(new Date(awsTime).toLocaleTimeString("ja-JP"));
+      setStartTime(data?.time);
       
     } catch (error) {
       console.error("サーバー時刻の取得に失敗しました:", error);
@@ -162,13 +183,16 @@ export default function App() {
       <input
         type="button"
         value="開始"
-        onClick={handleStartClick_server} // Enterキーを監視
+//NG    onClick={(fnc:Function=setStartTime)=>handleGetServerTime(fnc)} //アロー関数の引数には自動的にクリックイベントのデータが入るとのこと。従って空にしておくべし。
+        onClick={()=>handleGetServerTime(setStartTime)}
+//      onClick={handleStartClick_server} // Enterキーを監視
       />
       {/* 終了ボタン（開始ボタンが押されるまで無効化） */}
       <input
         type="button"
         value="終了"
-        onClick={handleEndClick} // Enterキーを監視
+//      onClick={handleEndClick} // Enterキーを監視
+        onClick={()=>handleGetServerTime(setEndTime)}
       />
 
       {/* 開始時刻等の表示 */}
