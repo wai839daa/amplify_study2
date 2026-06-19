@@ -21,7 +21,6 @@ export default function App() {
     filter: {
         createdAt: {
           gt: p_time // 「指定時刻より大きい（以降）」という条件
-//        gt: startTime // 「指定時刻より大きい（以降）」という条件
         }
       }
     });
@@ -35,6 +34,7 @@ export default function App() {
   //const targetTime = "2026-05-17T12:00:00.000Z"; 
   const [startTime, setStartTime] = useState<string | null>(null);
   const [endTime, setEndTime] = useState<string | null>(null);
+  const [isRunning, setIsRunning] = useState(false);
 
   //開始ボタン押下の処理
   //ローカル時刻取得の場合
@@ -45,7 +45,10 @@ export default function App() {
 
   //サーバ時刻取得（開始、終了の共通処理)
 //OK const handleGetServerTime = async (cbfnc:Function) => {  //この書き方でも動くが、大文字のFunctionは、「何でもいいから関数全般」という意味の、非常に大雑把な型で、型安全ではなくなってしまうとのこと。下記がよい。
-  const handleGetServerTime = async (cbfnc:(tm:string)=>void) => {
+//const handleGetServerTime = async (cbfnc:(tm:string)=>void) => {
+  const START:number=0;
+  const END:number=1;
+  const handleGetServerTime = async (flg:number=START|END) => {
     try {
       // DynamoDBではなく、AWSサーバーの関数をダイレクトに呼び出す！
       const { data, errors } = await client.queries.getServerTime();
@@ -56,10 +59,21 @@ export default function App() {
       }
 
       // サーバー時刻をコールバック関数で設定する。
-      cbfnc(data?.time);
-      
+      //cbfnc(data?.time);
+
+      if (flg == START) {
+        setStartTime(data?.time);
+        setEndTime(null);
+        setResults([]);
+        setIsRunning(true);
+      }else if(startTime != null){
+        setEndTime(data?.time);
+        setIsRunning(false);
+        read(startTime);
+      }
     } catch (error) {
       console.error("サーバー時刻の取得に失敗しました:", error);
+
     } finally {
     }
   };
@@ -139,7 +153,7 @@ export default function App() {
       write2(sahen,uhen,'+',seikai,Number(userAnswer));
       setSahen(getRandomInt());
       setUhen(getRandomInt());
-//     read (startTime);
+    //  read (startTime);
     }
   };
 
@@ -184,7 +198,7 @@ export default function App() {
         type="button"
         value="開始"
 //NG    onClick={(fnc:Function=setStartTime)=>handleGetServerTime(fnc)} //アロー関数の引数には自動的にクリックイベントのデータが入るとのこと。従って空にしておくべし。
-        onClick={()=>handleGetServerTime(setStartTime)}
+        onClick={()=>handleGetServerTime(START)}
 //      onClick={handleStartClick_server} // Enterキーを監視
       />
       {/* 終了ボタン（開始ボタンが押されるまで無効化） */}
@@ -192,7 +206,8 @@ export default function App() {
         type="button"
         value="終了"
 //      onClick={handleEndClick} // Enterキーを監視
-        onClick={()=>handleGetServerTime(setEndTime)}
+        onClick={()=>handleGetServerTime(END)}
+        disabled={!isRunning}
       />
 
       {/* 開始時刻等の表示 */}
@@ -204,7 +219,7 @@ export default function App() {
       )}
     </div>
       {/* 3. 表示部分 */}
-    <span>{sahen} + {uhen} = </span>
+    <span >{sahen} + {uhen} = </span>
     
     <input
       type="text"
@@ -212,6 +227,7 @@ export default function App() {
       onChange={(e) => setUserAnswer(e.target.value)} // 入力内容を同期
       onKeyDown={handleKeyDown} // Enterキーを監視
       placeholder="答えを入力"
+      disabled={!isRunning}
     />
 
     <div style={{ marginTop: '10px', fontWeight: 'bold' }}>
