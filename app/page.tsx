@@ -66,6 +66,8 @@ export default function App() {
         setEndTime(null);
         setResults([]);
         setIsRunning(true);
+        setSahen(getRandomInt());
+        setUhen(getRandomInt());
       }else if(startTime != null){
         setEndTime(data?.time);
         setIsRunning(false);
@@ -131,29 +133,34 @@ export default function App() {
   const KAGEN:number = 1;
   const JOUGEN:number = 100;
   
-  function getRandomInt(min:number=KAGEN, max:number=JOUGEN) {
+  function getRandomInt(min:number=KAGEN, max:number=JOUGEN) :number {
     const minCeiled = Math.ceil(min);
     const maxFloored = Math.floor(max);
     return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled); // 上限は除き、下限は含む
   }
 
   // 1. 各値を状態（State）として定義
-  const [sahen, setSahen] = useState(getRandomInt());  // 左辺（例: 5）
-  const [uhen, setUhen] = useState(getRandomInt());   // 右辺（例: 3）
+//const [sahen, setSahen] = useState(getRandomInt());  // 左辺（例: 5）
+//const [uhen, setUhen] = useState(getRandomInt());   // 右辺（例: 3）
+  const [sahen, setSahen] = useState(0);  // 左辺（例: 5）
+  const [uhen, setUhen] = useState(0);   // 右辺（例: 3）
   const [userAnswer, setUserAnswer] = useState(""); // ユーザーの入力値
   const [result, setResult] = useState(""); // 判定結果のメッセージ
 
   // 2. Enterキーが押された時の判定処理
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      const seikai = sahen + uhen;
-      const isCorrect = Number(userAnswer) === seikai;
-      setResult(isCorrect ? "正解！" : "残念、不正解...");
-      write(sahen,uhen,'+',seikai,Number(userAnswer));
-      write2(sahen,uhen,'+',seikai,Number(userAnswer));
-      setSahen(getRandomInt());
-      setUhen(getRandomInt());
-    //  read (startTime);
+      if (sahen != null && uhen != null){
+        const seikai = sahen + uhen;
+        const isCorrect = Number(userAnswer) === seikai;
+        setResult(isCorrect ? "正解！ 回答="+ userAnswer : "残念、不正解...正解=" + seikai +"、回答="+ userAnswer);
+        write(sahen,uhen,'+',seikai,Number(userAnswer));
+//      write2(sahen,uhen,'+',seikai,Number(userAnswer));
+        setSahen(getRandomInt());
+        setUhen(getRandomInt());
+        setUserAnswer("");
+      //  read (startTime);
+      }
     }
   };
 
@@ -219,7 +226,7 @@ export default function App() {
       )}
     </div>
       {/* 3. 表示部分 */}
-    <span >{sahen} + {uhen} = </span>
+    <span >{sahen} + {uhen} = </span> 
     
     <input
       type="text"
