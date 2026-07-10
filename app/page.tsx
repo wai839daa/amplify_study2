@@ -7,6 +7,7 @@ import "./../app/app.css";
 import { Amplify } from "aws-amplify";
 import outputs from "@/amplify_outputs.json";
 import "@aws-amplify/ui-react/styles.css";
+import { MutualAuthenticationMode } from "aws-cdk-lib/aws-elasticloadbalancingv2";
 
 Amplify.configure(outputs);
 const client = generateClient<Schema>();
@@ -29,12 +30,15 @@ export default function App() {
     else console.log("list関数_成功:", lists);
   
     setResults(lists);
+    calcAnserRate(lists);
   };
 
   //const targetTime = "2026-05-17T12:00:00.000Z"; 
   const [startTime, setStartTime] = useState<string | null>(null);
   const [endTime, setEndTime] = useState<string | null>(null);
+  const [diffTime, setDiffTime] = useState<string | null>(null);
   const [isRunning, setIsRunning] = useState(false);
+  const [seitouRitu, setSeitouRitu] = useState<string | null>(null);
 
   //開始ボタン押下の処理
   //ローカル時刻取得の場合
@@ -48,6 +52,37 @@ export default function App() {
 //const handleGetServerTime = async (cbfnc:(tm:string)=>void) => {
   const START:number=0;
   const END:number=1;
+  const calcTime = (et:string, st:string):string => {
+    //時刻型に変換
+    const dte = new Date(et);
+    const dts = new Date(st);
+
+    //ミリ秒計算
+    const diffMs = dte.getTime() - dts.getTime();
+
+    //ミリ秒を時間（時間・分）に変換
+    return "10:00:00";
+  }
+  
+  //結果情報より、正答率を算出、設定する。
+  //const calcAnserRate = (lists:[answer:any, seikai:number]):void => {
+  type Result2Item = Schema["Result2"]["type"];//Schema型のResult2テーブルの1レコード(複数項目を持つ)の型 (resources.ts参照)
+  const calcAnserRate = (lists:Result2Item[]):void => {
+    let seikaiCnt : number = 0;
+    let misuCnt : number = 0;
+    let ritu : number = 0;
+    
+//  lists.map((result2) => ( //foreachに変更すること！ mapは新配列を作る。新配列の返り値を利用するならmapがよい。
+    lists.forEach((result2) => ( //foreachに変更すること！
+      result2.answer == result2.seikai ? seikaiCnt=seikaiCnt+1 : misuCnt=misuCnt+1 
+      ));
+      ritu = (seikaiCnt / (seikaiCnt + misuCnt))*100;
+      console.log("seikaiCnt=="+seikaiCnt + ",misuCnt=="+misuCnt + ",ritu=="+ritu);
+      setSeitouRitu(ritu.toString());
+  }
+
+  //}
+
   const handleGetServerTime = async (flg:number=START|END) => {
     try {
       // DynamoDBではなく、AWSサーバーの関数をダイレクトに呼び出す！
@@ -64,12 +99,16 @@ export default function App() {
       if (flg == START) {
         setStartTime(data?.time);
         setEndTime(null);
+        setDiffTime(null);
         setResults([]);
         setIsRunning(true);
         setSahen(getRandomInt());
         setUhen(getRandomInt());
       }else if(startTime != null){
         setEndTime(data?.time);
+        setDiffTime(calcTime(data?.time, startTime));
+//      setDiffTime(data?.time);
+//      setDiffTime(data?.time - startTime);
         setIsRunning(false);
         read(startTime);
       }
@@ -213,7 +252,8 @@ export default function App() {
         type="button"
         value="終了"
 //      onClick={handleEndClick} // Enterキーを監視
-        onClick={()=>handleGetServerTime(END)}
+//      onClick={()=>{handleGetServerTime(END);calcAnserRate();}}
+        onClick={()=>{handleGetServerTime(END);}}
         disabled={!isRunning}
       />
 
@@ -222,6 +262,8 @@ export default function App() {
         <p style={{ marginTop: "1.5rem", fontSize: "18px" }}>
           開始時刻: <strong>{startTime}</strong>
           {endTime && <p>終了時刻: <strong>{endTime}</strong></p>}
+          {diffTime && <p>経過時間: <strong>{diffTime}</strong></p>}
+          {seitouRitu && <p>正答率: <strong>{seitouRitu}％</strong></p>}
         </p>
       )}
     </div>
