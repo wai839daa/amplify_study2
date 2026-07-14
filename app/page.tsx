@@ -60,8 +60,12 @@ export default function App() {
     //ミリ秒計算
     const diffMs = dte.getTime() - dts.getTime();
 
-    //ミリ秒を時間（時間・分）に変換
-    return "10:00:00";
+    // ミリ秒を時間（時間・分・秒）に変換
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    const diffSec = Math.floor((diffMs % (1000 * 60)) / 1000);
+
+    return diffHours + ":" + diffMins+ ":" + diffSec ;
   }
   
   //結果情報より、正答率を算出、設定する。
