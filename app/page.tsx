@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "@/amplify/data/resource";
+//CSSインポートエラーが生じる時は、global.d.tsというファイルを生成し、declare module "*.css";の１行を記載する。
 //import "./../app/app.css";
 import "./app.css";
 import { Amplify } from "aws-amplify";
@@ -18,16 +19,48 @@ export default function App() {
 
   //DB内容を取得
   const [results, setResults] = useState<Array<Schema["Result2"]["type"]>>([]);  
+	async function read2(p_time: string) { //複数ページで返された場合を考慮
+		let allLists: any[] = [];
+		let currentToken: string | null | undefined = null;
+
+		do {
+//  	const { data: lists, errors, nextToken: nextTokenFromAWS  } = await client.models.Result2.list({ //左記の分割代入では、TypeScriptが型を正しく推論できない為、下の書き方に変え、一度オブジェクトとして結果を受け取る書き方に変えた。
+			const readResult:any = await client.models.Result2.list({
+				filter: {
+					createdAt: {
+				    gt: p_time // 「指定時刻より大きい（以降）」という条件
+				  },
+				},
+        nextToken: currentToken //APIパラメタには、前回実行時のAPI返り値をセットする。
+      });
+
+			if (readResult.errors) {
+				console.log("list関数_失敗:errors== ", readResult.errors);
+				break;
+			}
+
+			allLists = allLists.concat(readResult.data);
+			currentToken = readResult.nextToken ; // 次のページがある場合は、API返り値のトークンがセットされる
+
+		} while (currentToken);
+
+		console.log("すべての取得データ:", allLists);
+		setResults(allLists);
+		calcAnserRate(allLists);
+	}
+
+
   async function read(p_time:string){
     console.log ('p_time==' + p_time);
     const { data: lists, errors } = await client.models.Result2.list({
     filter: {
         createdAt: {
           gt: p_time // 「指定時刻より大きい（以降）」という条件
-        }
+        },
       }
     });
-    
+    limit: 1000 // 1回あたりの最大取得件数を増やす（ただし1MB制限は超えられない）
+      
     if (errors) console.log("list関数_失敗:errors== " + errors + ",lists==" + lists);
     else console.log("list関数_成功:", lists);
   
@@ -40,7 +73,10 @@ export default function App() {
   const [endTime, setEndTime] = useState<string | null>(null);
   const [diffTime, setDiffTime] = useState<string | null>(null);
   const [isRunning, setIsRunning] = useState(false);
+  const [seikaiCnt, setSeikaiCnt] = useState<string | null>(null);
+  const [misuCnt, setMisuCnt] = useState<string | null>(null);
   const [seitouRitu, setSeitouRitu] = useState<string | null>(null);
+
 
   //開始ボタン押下の処理
   //ローカル時刻取得の場合
@@ -84,6 +120,8 @@ export default function App() {
       ));
       ritu = (seikaiCnt / (seikaiCnt + misuCnt))*100;
       console.log("seikaiCnt=="+seikaiCnt + ",misuCnt=="+misuCnt + ",ritu=="+ritu);
+      setSeikaiCnt(seikaiCnt.toString());
+      setMisuCnt(misuCnt.toString());
       setSeitouRitu(ritu.toString());
   }
 
@@ -116,7 +154,7 @@ export default function App() {
 //      setDiffTime(data?.time);
 //      setDiffTime(data?.time - startTime);
         setIsRunning(false);
-        read(startTime);
+        read2(startTime);
       }
     } catch (error) {
       console.error("サーバー時刻の取得に失敗しました:", error);
@@ -269,7 +307,7 @@ export default function App() {
           開始時刻: <strong>{startTime}</strong>
           {endTime && <p>終了時刻: <strong>{endTime}</strong></p>}
           {diffTime && <p>経過時間: <strong>{diffTime}</strong></p>}
-          {seitouRitu && <p>正答率: <strong>{seitouRitu}％</strong></p>}
+          {seikaiCnt && <p>正解: <strong>{seikaiCnt}回</strong>、不正: <strong>{misuCnt}回</strong>、正答率: <strong>{seitouRitu}％</strong></p>}
         </p>
       )}
     </div>
