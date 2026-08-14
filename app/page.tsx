@@ -229,6 +229,7 @@ export default function App() {
   const [uhen, setUhen] = useState(0);   // 右辺（例: 3）
   const [userAnswer, setUserAnswer] = useState(""); // ユーザーの入力値
   const [result, setResult] = useState(""); // 判定結果のメッセージ
+  const [memo, setMemo] = useState<string>('');
 
   // 2. Enterキーが押された時の判定処理
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -281,107 +282,109 @@ export default function App() {
     else console.log("write2_Todo_作成成功:", newResult);
   };
 
-  return (
-  <div style={{ padding: '20px' }}>
-    <div>
-      <input
-        type="button"
-        value="開始"
-//NG    onClick={(fnc:Function=setStartTime)=>handleGetServerTime(fnc)} //アロー関数の引数には自動的にクリックイベントのデータが入るとのこと。従って空にしておくべし。
-        onClick={()=>handleGetServerTime(START)}
-//      onClick={handleStartClick_server} // Enterキーを監視
-      />
-      {/* 終了ボタン（開始ボタンが押されるまで無効化） */}
-      <input
-        type="button"
-        value="終了"
-//      onClick={handleEndClick} // Enterキーを監視
-//      onClick={()=>{handleGetServerTime(END);calcAnserRate();}}
-        onClick={()=>{handleGetServerTime(END);}}
-        disabled={!isRunning}
-      />
+  //画面切り替え用変数
+  const [currentScreen, setCurrentScreen] = useState<'frameHome' | 'frameKeisan'>('frameHome');
 
-      {/* 開始時刻等の表示 */}
-      {startTime && (
-        <p style={{ marginTop: "1.5rem", fontSize: "18px" }}>
-          開始時刻: <strong>{startTime}</strong>
-          {endTime && <p>終了時刻: <strong>{endTime}</strong></p>}
-          {diffTime && <p>経過時間: <strong>{diffTime}</strong></p>}
-          {seikaiCnt && <p>正解: <strong>{seikaiCnt}回</strong>、不正: <strong>{misuCnt}回</strong>、正答率: <strong>{seitouRitu}％</strong></p>}
-        </p>
+  //計算画面
+  // 親コンポーネントから「戻る機能」等を受け取るための型定義
+  interface AFrameProps {
+    userAnswer:string
+    setUserAnswer:(value:string) => void;
+    memo:string;
+    setMemo: (value: string) => void;
+    onBack: () => void;
+  }
+
+  function FchgKeisan({ userAnswer, setUserAnswer, memo, setMemo, onBack }: AFrameProps) {
+//function FchgKeisan({ onBack }: AFrameProps) {
+    // 計算画面専用のステートや複雑なロジックをここに記述できます
+    return (
+      <div style={{ border: '1px solid #ccc', padding: '20px', borderRadius: '8px' }}>
+        <h1>計算画面</h1>
+
+        {/* 複雑なフォームやデータ表示などをここに配置 */}
+        <div style={{ padding: '20px' }}>
+          <div>
+            <input
+              type="button"
+              value="開始"
+      //NG    onClick={(fnc:Function=setStartTime)=>handleGetServerTime(fnc)} //アロー関数の引数には自動的にクリックイベントのデータが入るとのこと。従って空にしておくべし。
+              onClick={()=>handleGetServerTime(START)}
+      //      onClick={handleStartClick_server} // Enterキーを監視
+            />
+            {/* 終了ボタン（開始ボタンが押されるまで無効化） */}
+            <input
+              type="button"
+              value="終了"
+      //      onClick={handleEndClick} // Enterキーを監視
+      //      onClick={()=>{handleGetServerTime(END);calcAnserRate();}}
+              onClick={()=>{handleGetServerTime(END);}}
+              disabled={!isRunning}
+            />
+
+            {/* 開始時刻等の表示 */}
+            {startTime && (
+              <p style={{ marginTop: "1.5rem", fontSize: "18px" }}>
+                開始時刻: <strong>{startTime}</strong>
+                {endTime && <p>終了時刻: <strong>{endTime}</strong></p>}
+                {diffTime && <p>経過時間: <strong>{diffTime}</strong></p>}
+                {seikaiCnt && <p>正解: <strong>{seikaiCnt}回</strong>、不正: <strong>{misuCnt}回</strong>、正答率: <strong>{seitouRitu}％</strong></p>}
+              </p>
+            )}
+          </div>
+            {/* 3. 表示部分 */}
+          <span >{sahen} + {uhen} = </span> 
+          
+          <input
+            type="text"
+            value={userAnswer}
+            onChange={(e) => setUserAnswer(e.target.value)} // 入力内容を同期
+            onKeyDown={handleKeyDown} // Enterキーを監視
+            placeholder="答えを入力"
+            disabled={!isRunning}
+          />
+          <input
+            type="text"
+            value={memo}
+            onChange={(e) => setMemo(e.target.value)}
+            placeholder="メモ"
+            disabled={!isRunning}
+          />
+
+          <div style={{ marginTop: '10px', fontWeight: 'bold' }}>
+            {result}
+          </div>
+        
+          <ul>
+              {results.map((result2) => (
+                <li key={result2.id}>{result2.saen + ' ' + result2.siki + ' ' + result2.uhen + ' = ' + result2.answer + '＜' + result2.seikai + '＞' + ((result2.answer == result2.seikai) ? '正解！' : '残念、不正解')}</li>
+              ))}
+            </ul>
+
+        </div>
+        
+        <button onClick={onBack} style={{ marginTop: '20px' }}>
+          開始画面に戻る
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
+      {currentScreen === 'frameHome' ? (
+        // 開始画面
+        <div>
+          <h1>開始画面</h1>
+          <p>ようこそ！下のボタンを押してください。</p>
+          <button onClick={() => setCurrentScreen('frameKeisan')}>
+            計算画面ボタン
+          </button>
+        </div>
+      ) : (
+        // 計算画面（関数を呼び出し、戻る処理を Props で渡す）
+        <FchgKeisan onBack={() => setCurrentScreen('frameHome')} />
       )}
     </div>
-      {/* 3. 表示部分 */}
-    <span >{sahen} + {uhen} = </span> 
-    
-    <input
-      type="text"
-      value={userAnswer}
-      onChange={(e) => setUserAnswer(e.target.value)} // 入力内容を同期
-      onKeyDown={handleKeyDown} // Enterキーを監視
-      placeholder="答えを入力"
-      disabled={!isRunning}
-    />
-
-    <div style={{ marginTop: '10px', fontWeight: 'bold' }}>
-      {result}
-    </div>
-  
-     <ul>
-        {results.map((result2) => (
-          <li key={result2.id}>{result2.saen + ' ' + result2.siki + ' ' + result2.uhen + ' = ' + result2.answer + '＜' + result2.seikai + '＞' + ((result2.answer == result2.seikai) ? '正解！' : '残念、不正解')}</li>
-        ))}
-      </ul>
-
-  </div>
-);
-
-/* お試し
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      alert("OK");
-    }
-  };
-
-  return (
-    <main>
-      <h1>脳トレ</h1>
-      <div>
-        <input type="text" id="sahen" name="sahen" value="1" style={{ width: '100px' }}></input>
-        ＋
-        <input type="text" id="uhen" name="uhen" value="2" style={{ width: '100px' }}></input>
-        ＝
-        <input type="text" id="kotae" name="kotae" style={{ width: '100px' }} onKeyDown={handleKeyDown} ></input>
-      </div>
-      <div>
-        🥳 App successfully hosted. Try creating a new todo.
-        <br />
-        <a href="https://docs.amplify.aws/nextjs/start/quickstart/nextjs-app-router-client-components/">
-          Review next steps of this tutorial.
-        </a>
-      </div>
-    </main>
   );
-*/
-
-  /*ORG
-  return (
-    <main>
-      <h1>My todos</h1>
-      <button onClick={createTodo}>+ new</button>
-      <ul>
-        {todos.map((todo) => (
-          <li key={todo.id}>{todo.content}</li>
-        ))}
-      </ul>
-      <div>
-        🥳 App successfully hosted. Try creating a new todo.
-        <br />
-        <a href="https://docs.amplify.aws/nextjs/start/quickstart/nextjs-app-router-client-components/">
-          Review next steps of this tutorial.
-        </a>
-      </div>
-    </main>
-  );
-*/
 }
