@@ -288,7 +288,7 @@ export default function App() {
   //計算画面
   // 親コンポーネントから「戻る機能」等を受け取るための型定義
   interface AFrameProps {
-    userAnswer:string
+    userAnswer:string;
     setUserAnswer:(value:string) => void;
     memo:string;
     setMemo: (value: string) => void;
