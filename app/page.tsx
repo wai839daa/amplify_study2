@@ -15,7 +15,158 @@ import { MutualAuthenticationMode } from "aws-cdk-lib/aws-elasticloadbalancingv2
 Amplify.configure(outputs);
 const client = generateClient<Schema>();
 
+//計算画面
+// 親コンポーネントから「戻る機能」等を受け取るための型定義
+interface AFrameProps {
+  userAnswer:string;
+  setUserAnswer:(value:string) => void;
+  memo:string;
+  setMemo: (value: string) => void;
+  onBack: () => void;
+  handleGetServerTime: (flg:number)=>void;
+  START:number;
+  END:number;
+  isRunning:boolean;
+  startTime:string|null;
+  endTime:string|null;
+  diffTime:string;
+  seikaiCnt:string;
+  misuCnt:string;
+  seitouRitu:string;
+  sahen:number;
+  uhen:number;
+  handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>)=>void;
+  results: Array<Schema["Result2"]["type"]>;
+  result:string;
+////9月14日追加
+  setStartTime: (value: string) => void;
+  setEndTime: (value: string) => void;
+  setDiffTime: (value: string) => void;
+  setSeikaiCnt: (value: string) => void;
+  setMisuCnt: (value: string) => void;
+  setSeitouRitu: (value: string) => void;
+  setSahen: (value: number) => void;
+  setUhen: (value: number) => void;
+  setResults:(value:Array<Schema["Result2"]["type"]>) => void;
+  setResult: (value: string) => void;
+}
+
+
+//function FchgKeisan({ userAnswer, setUserAnswer, memo, setMemo, onBack, handleGetServerTime,START,END,isRunning,startTime,endTime,diffTime,seikaiCnt,misuCnt,seitouRitu,sahen,uhen,handleKeyDown,results,result }: AFrameProps) {
+//function FchgKeisan({ onBack }: AFrameProps) {
+function FchgKeisan({ userAnswer,setUserAnswer,memo,setMemo,handleGetServerTime,handleKeyDown,START,END,isRunning,startTime,endTime,diffTime,seikaiCnt,misuCnt,seitouRitu,sahen,uhen,results,result,onBack,setCurrentScreen,setStartTime,setEndTime,setDiffTime,setSeikaiCnt,setMisuCnt,setSeitouRitu,setSahen,setUhen,setResults,setResult }: AFrameProps) {
+//<FchgKeisan userAnswer={userAnswer} setUserAnswer={setUserAnswer} memo={memo} setMemo={setMemo} handleGetServerTime={handleGetServerTime} handleKeyDown={handleKeyDown} START={START} END={END} isRunning={isRunning} startTime="" endTime="" diffTime="" seikaiCnt="" misuCnt="" seitouRitu="" sahen={sahen} uhen={uhen} results={results} result={result} onBack={() => setCurrentScreen('frameHome')} setStartTime={setStartTime} setEndTime={setEndTime} setDiffTime={setDiffTime} setSeikaiCnt={setSeikaiCnt} setMisuCnt={setMisuCnt} setSeitouRitu={setSeitouRitu} setSahen={setSahen} setUhen={setUhen} setResults={setResults} setResult={setResult} />
+  // 計算画面専用のステートや複雑なロジックをここに記述できます
+  return (
+    <div style={{ border: '1px solid #ccc', padding: '20px', borderRadius: '8px' }}>
+      <h1>計算画面</h1>
+
+      {/* 複雑なフォームやデータ表示などをここに配置 */}
+      <div style={{ padding: '20px' }}>
+        <div>
+          <input
+            type="button"
+            value="開始"
+    //NG    onClick={(fnc:Function=setStartTime)=>handleGetServerTime(fnc)} //アロー関数の引数には自動的にクリックイベントのデータが入るとのこと。従って空にしておくべし。
+            onClick={()=>handleGetServerTime(START)}
+    //      onClick={handleStartClick_server} // Enterキーを監視
+          />
+          {/* 終了ボタン（開始ボタンが押されるまで無効化） */}
+          <input
+            type="button"
+            value="終了"
+    //      onClick={handleEndClick} // Enterキーを監視
+    //      onClick={()=>{handleGetServerTime(END);calcAnserRate();}}
+            onClick={()=>{handleGetServerTime(END);}}
+            disabled={!isRunning}
+          />
+
+          {/* 開始時刻等の表示 */}
+          {startTime && (
+            <p style={{ marginTop: "1.5rem", fontSize: "18px" }}>
+              開始時刻: <strong>{startTime}</strong>
+              {endTime && <p>終了時刻: <strong>{endTime}</strong></p>}
+              {diffTime && <p>経過時間: <strong>{diffTime}</strong></p>}
+              {seikaiCnt && <p>正解: <strong>{seikaiCnt}回</strong>、不正: <strong>{misuCnt}回</strong>、正答率: <strong>{seitouRitu}％</strong></p>}
+            </p>
+          )}
+        </div>
+          {/* 3. 表示部分 */}
+        <span >{sahen} + {uhen} = </span> 
+        
+        <input
+          type="text"
+          value={userAnswer}
+          onChange={(e) => setUserAnswer(e.target.value)} // 入力内容を同期
+          onKeyDown={handleKeyDown} // Enterキーを監視
+          placeholder="答えを入力"
+          disabled={!isRunning}
+        />
+        <input
+          type="text"
+          value={memo}
+          onChange={(e) => setMemo(e.target.value)}
+          placeholder="メモ"
+          disabled={!isRunning}
+        />
+
+        <div style={{ marginTop: '10px', fontWeight: 'bold' }}>
+          {result}
+        </div>
+      
+        <ul>
+            {results.map((result2) => (
+              <li key={result2.id}>{result2.saen + ' ' + result2.siki + ' ' + result2.uhen + ' = ' + result2.answer + '＜' + result2.seikai + '＞' + ((result2.answer == result2.seikai) ? '正解！' : '残念、不正解')}</li>
+            ))}
+          </ul>
+
+      </div>
+      
+      <button onClick={onBack} style={{ marginTop: '20px' }}>
+        開始画面に戻る
+      </button>
+    </div>
+  );
+}
+
+
 export default function App() {
+  const handleGetServerTime = async (flg:number=START|END) => {
+    try {
+      // DynamoDBではなく、AWSサーバーの関数をダイレクトに呼び出す！
+      const { data, errors } = await client.queries.getServerTime();
+      console.log("サーバー時刻の取得に成功しました:", "data?.time=" + data?.time);
+
+      if (errors || !data?.time) {
+        throw new Error();
+      }
+
+      // サーバー時刻をコールバック関数で設定する。
+      //cbfnc(data?.time);
+
+      if (flg == START) {
+        setStartTime(data?.time);
+        setEndTime(null);
+        setDiffTime(null);
+        setResults([]);
+        setIsRunning(true);
+        setSahen(getRandomInt());
+        setUhen(getRandomInt());
+      }else if(startTime != null){
+        setEndTime(data?.time);
+        setDiffTime(calcTime(data?.time, startTime));
+  //      setDiffTime(data?.time);
+  //      setDiffTime(data?.time - startTime);
+        setIsRunning(false);
+        read2(startTime);
+      }
+    } catch (error) {
+      console.error("サーバー時刻の取得に失敗しました:", error);
+
+    } finally {
+    }
+  };
+
 
   //DB内容を取得
   const [results, setResults] = useState<Array<Schema["Result2"]["type"]>>([]);  
@@ -126,42 +277,6 @@ export default function App() {
   }
 
   //}
-
-  const handleGetServerTime = async (flg:number=START|END) => {
-    try {
-      // DynamoDBではなく、AWSサーバーの関数をダイレクトに呼び出す！
-      const { data, errors } = await client.queries.getServerTime();
-      console.log("サーバー時刻の取得に成功しました:", "data?.time=" + data?.time);
-
-      if (errors || !data?.time) {
-        throw new Error();
-      }
-
-      // サーバー時刻をコールバック関数で設定する。
-      //cbfnc(data?.time);
-
-      if (flg == START) {
-        setStartTime(data?.time);
-        setEndTime(null);
-        setDiffTime(null);
-        setResults([]);
-        setIsRunning(true);
-        setSahen(getRandomInt());
-        setUhen(getRandomInt());
-      }else if(startTime != null){
-        setEndTime(data?.time);
-        setDiffTime(calcTime(data?.time, startTime));
-//      setDiffTime(data?.time);
-//      setDiffTime(data?.time - startTime);
-        setIsRunning(false);
-        read2(startTime);
-      }
-    } catch (error) {
-      console.error("サーバー時刻の取得に失敗しました:", error);
-
-    } finally {
-    }
-  };
 
   //サーバ時刻取得の場合
   const handleStartClick_server = async () => {
@@ -285,91 +400,6 @@ export default function App() {
   //画面切り替え用変数
   const [currentScreen, setCurrentScreen] = useState<'frameHome' | 'frameKeisan'>('frameHome');
 
-  //計算画面
-  // 親コンポーネントから「戻る機能」等を受け取るための型定義
-  interface AFrameProps {
-    userAnswer:string;
-    setUserAnswer:(value:string) => void;
-    memo:string;
-    setMemo: (value: string) => void;
-    onBack: () => void;
-  }
-
-  function FchgKeisan({ userAnswer, setUserAnswer, memo, setMemo, onBack }: AFrameProps) {
-//function FchgKeisan({ onBack }: AFrameProps) {
-    // 計算画面専用のステートや複雑なロジックをここに記述できます
-    return (
-      <div style={{ border: '1px solid #ccc', padding: '20px', borderRadius: '8px' }}>
-        <h1>計算画面</h1>
-
-        {/* 複雑なフォームやデータ表示などをここに配置 */}
-        <div style={{ padding: '20px' }}>
-          <div>
-            <input
-              type="button"
-              value="開始"
-      //NG    onClick={(fnc:Function=setStartTime)=>handleGetServerTime(fnc)} //アロー関数の引数には自動的にクリックイベントのデータが入るとのこと。従って空にしておくべし。
-              onClick={()=>handleGetServerTime(START)}
-      //      onClick={handleStartClick_server} // Enterキーを監視
-            />
-            {/* 終了ボタン（開始ボタンが押されるまで無効化） */}
-            <input
-              type="button"
-              value="終了"
-      //      onClick={handleEndClick} // Enterキーを監視
-      //      onClick={()=>{handleGetServerTime(END);calcAnserRate();}}
-              onClick={()=>{handleGetServerTime(END);}}
-              disabled={!isRunning}
-            />
-
-            {/* 開始時刻等の表示 */}
-            {startTime && (
-              <p style={{ marginTop: "1.5rem", fontSize: "18px" }}>
-                開始時刻: <strong>{startTime}</strong>
-                {endTime && <p>終了時刻: <strong>{endTime}</strong></p>}
-                {diffTime && <p>経過時間: <strong>{diffTime}</strong></p>}
-                {seikaiCnt && <p>正解: <strong>{seikaiCnt}回</strong>、不正: <strong>{misuCnt}回</strong>、正答率: <strong>{seitouRitu}％</strong></p>}
-              </p>
-            )}
-          </div>
-            {/* 3. 表示部分 */}
-          <span >{sahen} + {uhen} = </span> 
-          
-          <input
-            type="text"
-            value={userAnswer}
-            onChange={(e) => setUserAnswer(e.target.value)} // 入力内容を同期
-            onKeyDown={handleKeyDown} // Enterキーを監視
-            placeholder="答えを入力"
-            disabled={!isRunning}
-          />
-          <input
-            type="text"
-            value={memo}
-            onChange={(e) => setMemo(e.target.value)}
-            placeholder="メモ"
-            disabled={!isRunning}
-          />
-
-          <div style={{ marginTop: '10px', fontWeight: 'bold' }}>
-            {result}
-          </div>
-        
-          <ul>
-              {results.map((result2) => (
-                <li key={result2.id}>{result2.saen + ' ' + result2.siki + ' ' + result2.uhen + ' = ' + result2.answer + '＜' + result2.seikai + '＞' + ((result2.answer == result2.seikai) ? '正解！' : '残念、不正解')}</li>
-              ))}
-            </ul>
-
-        </div>
-        
-        <button onClick={onBack} style={{ marginTop: '20px' }}>
-          開始画面に戻る
-        </button>
-      </div>
-    );
-  }
-
   return (
     <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
       {currentScreen === 'frameHome' ? (
@@ -383,8 +413,12 @@ export default function App() {
         </div>
       ) : (
         // 計算画面（関数を呼び出し、戻る処理を Props で渡す）
-        <FchgKeisan onBack={() => setCurrentScreen('frameHome')} />
-      )}
+//      <FchgKeisan onBack={() => setCurrentScreen('frameHome')} />
+//      <FchgKeisan userAnswer='' setUserAnswer={(userAnswer)=>setUserAnswer(userAnswer)} memo='' setMemo={(memo)=>setMemo(memo)} handleGetServerTime={(flg:number=START)=>handleGetServerTime(flg)} START:number END:number onBack={() => setCurrentScreen('frameHome')} />
+//      <FchgKeisan userAnswer='' setUserAnswer={(userAnswer)=>setUserAnswer(userAnswer)} memo='' setMemo={(memo)=>setMemo(memo)} handleGetServerTime={(flg:number=START)=>handleGetServerTime(flg)} onBack={() => setCurrentScreen('frameHome')} />
+//      <FchgKeisan userAnswer={userAnswer} setUserAnswer={setUserAnswer} memo={memo} setMemo={setMemo} handleGetServerTime={handleGetServerTime} isRunning={isRunning} onBack={() => setCurrentScreen('frameHome')} />
+        <FchgKeisan userAnswer={userAnswer} setUserAnswer={setUserAnswer} memo={memo} setMemo={setMemo} handleGetServerTime={handleGetServerTime} handleKeyDown={handleKeyDown} START={START} END={END} isRunning={isRunning} startTime={startTime} endTime={endTime} diffTime="" seikaiCnt="" misuCnt="" seitouRitu="" sahen={sahen} uhen={uhen} results={results} result={result} onBack={() => setCurrentScreen('frameHome')} setStartTime={setStartTime} setEndTime={setEndTime} setDiffTime={setDiffTime} setSeikaiCnt={setSeikaiCnt} setMisuCnt={setMisuCnt} setSeitouRitu={setSeitouRitu} setSahen={setSahen} setUhen={setUhen} setResults={setResults} setResult={setResult} />
+)}
     </div>
   );
 }
