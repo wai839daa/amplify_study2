@@ -23,6 +23,7 @@ interface AFrameProps {
   memo:string;
   setMemo: (value: string) => void;
   onBack: () => void;
+  setCurrentScreen: (value: string) => void;
   handleGetServerTime: (flg:number)=>void;
   START:number;
   END:number;
@@ -417,8 +418,9 @@ export default function App() {
 //      <FchgKeisan userAnswer='' setUserAnswer={(userAnswer)=>setUserAnswer(userAnswer)} memo='' setMemo={(memo)=>setMemo(memo)} handleGetServerTime={(flg:number=START)=>handleGetServerTime(flg)} START:number END:number onBack={() => setCurrentScreen('frameHome')} />
 //      <FchgKeisan userAnswer='' setUserAnswer={(userAnswer)=>setUserAnswer(userAnswer)} memo='' setMemo={(memo)=>setMemo(memo)} handleGetServerTime={(flg:number=START)=>handleGetServerTime(flg)} onBack={() => setCurrentScreen('frameHome')} />
 //      <FchgKeisan userAnswer={userAnswer} setUserAnswer={setUserAnswer} memo={memo} setMemo={setMemo} handleGetServerTime={handleGetServerTime} isRunning={isRunning} onBack={() => setCurrentScreen('frameHome')} />
-        <FchgKeisan userAnswer={userAnswer} setUserAnswer={setUserAnswer} memo={memo} setMemo={setMemo} handleGetServerTime={handleGetServerTime} handleKeyDown={handleKeyDown} START={START} END={END} isRunning={isRunning} startTime={startTime} endTime={endTime} diffTime="" seikaiCnt="" misuCnt="" seitouRitu="" sahen={sahen} uhen={uhen} results={results} result={result} onBack={() => setCurrentScreen('frameHome')} setStartTime={setStartTime} setEndTime={setEndTime} setDiffTime={setDiffTime} setSeikaiCnt={setSeikaiCnt} setMisuCnt={setMisuCnt} setSeitouRitu={setSeitouRitu} setSahen={setSahen} setUhen={setUhen} setResults={setResults} setResult={setResult} />
-)}
+//      <FchgKeisan userAnswer={userAnswer} setUserAnswer={setUserAnswer} memo={memo} setMemo={setMemo} handleGetServerTime={handleGetServerTime} handleKeyDown={handleKeyDown} START={START} END={END} isRunning={isRunning} startTime={startTime} endTime={endTime} diffTime="" seikaiCnt="" misuCnt="" seitouRitu="" sahen={sahen} uhen={uhen} results={results} result={result} onBack={() => setCurrentScreen('frameHome')} setStartTime={setStartTime} setEndTime={setEndTime} setDiffTime={setDiffTime} setSeikaiCnt={setSeikaiCnt} setMisuCnt={setMisuCnt} setSeitouRitu={setSeitouRitu} setSahen={setSahen} setUhen={setUhen} setResults={setResults} setResult={setResult} />
+        <FchgKeisan userAnswer={userAnswer} setUserAnswer={setUserAnswer} memo={memo} setMemo={setMemo} handleGetServerTime={handleGetServerTime} handleKeyDown={handleKeyDown} START={START} END={END} isRunning={isRunning} startTime={startTime} endTime={endTime} diffTime="" seikaiCnt="" misuCnt="" seitouRitu="" sahen={sahen} uhen={uhen} results={results} result={result} onBack={() => setCurrentScreen('frameHome')} setCurrentScreen={setCurrentScreen} setStartTime={setStartTime} setEndTime={setEndTime} setDiffTime={setDiffTime} setSeikaiCnt={setSeikaiCnt} setMisuCnt={setMisuCnt} setSeitouRitu={setSeitouRitu} setSahen={setSahen} setUhen={setUhen} setResults={setResults} setResult={setResult} />
+      )}
     </div>
   );
 }
