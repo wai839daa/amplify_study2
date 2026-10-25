@@ -20,8 +20,8 @@ const client = generateClient<Schema>();
 interface AFrameProps {
   userAnswer:string;
   setUserAnswer:(value:string) => void;
-  memo:string;
-  setMemo: (value: string) => void;
+// memo:string;
+// setMemo: (value: string) => void;
   onBack: () => void;
   currentScreen:'frameHome' | 'frameKeisan';
   setCurrentScreen: (value:'frameHome' | 'frameKeisan') => void;
@@ -55,7 +55,8 @@ interface AFrameProps {
 }
 
 // 計算画面
-export default function FchgKeisan({ userAnswer,setUserAnswer,memo,setMemo,handleGetServerTime,handleKeyDown,START,END,isRunning,startTime,endTime,diffTime,seikaiCnt,misuCnt,seitouRitu,sahen,uhen,results,result,onBack,setCurrentScreen,setStartTime,setEndTime,setDiffTime,setSeikaiCnt,setMisuCnt,setSeitouRitu,setSahen,setUhen,setResults,setResult }: AFrameProps) {
+//export default function FchgKeisan({ userAnswer,setUserAnswer,memo,setMemo,handleGetServerTime,handleKeyDown,START,END,isRunning,startTime,endTime,diffTime,seikaiCnt,misuCnt,seitouRitu,sahen,uhen,results,result,onBack,setCurrentScreen,setStartTime,setEndTime,setDiffTime,setSeikaiCnt,setMisuCnt,setSeitouRitu,setSahen,setUhen,setResults,setResult }: AFrameProps) {
+export default function FchgKeisan({ userAnswer,setUserAnswer,handleGetServerTime,handleKeyDown,START,END,isRunning,startTime,endTime,diffTime,seikaiCnt,misuCnt,seitouRitu,sahen,uhen,results,result,onBack,setCurrentScreen,setStartTime,setEndTime,setDiffTime,setSeikaiCnt,setMisuCnt,setSeitouRitu,setSahen,setUhen,setResults,setResult }: AFrameProps) {
   return (
     <div style={{ border: '1px solid #ccc', padding: '20px', borderRadius: '8px' }}>
       <h1>計算画面</h1>
@@ -98,14 +99,6 @@ export default function FchgKeisan({ userAnswer,setUserAnswer,memo,setMemo,handl
           placeholder="答えを入力"
           disabled={!isRunning}
         />
-        <input
-          type="text"
-          value={memo}
-          onChange={(e) => setMemo(e.target.value)}
-          placeholder="メモ"
-          disabled={!isRunning}
-        />
-
         <div style={{ marginTop: '10px', fontWeight: 'bold' }}>
           {result}
         </div>

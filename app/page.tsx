@@ -206,7 +206,7 @@ export default function App() {
   const [uhen, setUhen] = useState(0);   // 右辺（例: 3）
   const [userAnswer, setUserAnswer] = useState(""); // ユーザーの入力値
   const [result, setResult] = useState(""); // 判定結果のメッセージ
-  const [memo, setMemo] = useState<string>('');
+  //const [memo, setMemo] = useState<string>('');
 
   // 2. Enterキーが押された時の判定処理
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -273,7 +273,8 @@ export default function App() {
         </div>
       ) : (
         // 計算画面（関数を呼び出し、戻る処理を Props で渡す）
-        <FchgKeisan userAnswer={userAnswer} setUserAnswer={setUserAnswer} memo={memo} setMemo={setMemo} handleGetServerTime={handleGetServerTime} handleKeyDown={handleKeyDown} START={START} END={END} isRunning={isRunning} startTime={startTime} endTime={endTime} diffTime="" seikaiCnt="" misuCnt="" seitouRitu="" sahen={sahen} uhen={uhen} results={results} result={result} onBack={() => setCurrentScreen('frameHome')} currentScreen={currentScreen} setCurrentScreen={setCurrentScreen} setStartTime={setStartTime} setEndTime={setEndTime} setDiffTime={setDiffTime} setSeikaiCnt={setSeikaiCnt} setMisuCnt={setMisuCnt} setSeitouRitu={setSeitouRitu} setSahen={setSahen} setUhen={setUhen} setResults={setResults} setResult={setResult} />
+//      <FchgKeisan userAnswer={userAnswer} setUserAnswer={setUserAnswer} memo={memo} setMemo={setMemo} handleGetServerTime={handleGetServerTime} handleKeyDown={handleKeyDown} START={START} END={END} isRunning={isRunning} startTime={startTime} endTime={endTime} diffTime="" seikaiCnt="" misuCnt="" seitouRitu="" sahen={sahen} uhen={uhen} results={results} result={result} onBack={() => setCurrentScreen('frameHome')} currentScreen={currentScreen} setCurrentScreen={setCurrentScreen} setStartTime={setStartTime} setEndTime={setEndTime} setDiffTime={setDiffTime} setSeikaiCnt={setSeikaiCnt} setMisuCnt={setMisuCnt} setSeitouRitu={setSeitouRitu} setSahen={setSahen} setUhen={setUhen} setResults={setResults} setResult={setResult} />
+        <FchgKeisan userAnswer={userAnswer} setUserAnswer={setUserAnswer} handleGetServerTime={handleGetServerTime} handleKeyDown={handleKeyDown} START={START} END={END} isRunning={isRunning} startTime={startTime} endTime={endTime} diffTime="" seikaiCnt="" misuCnt="" seitouRitu="" sahen={sahen} uhen={uhen} results={results} result={result} onBack={() => setCurrentScreen('frameHome')} currentScreen={currentScreen} setCurrentScreen={setCurrentScreen} setStartTime={setStartTime} setEndTime={setEndTime} setDiffTime={setDiffTime} setSeikaiCnt={setSeikaiCnt} setMisuCnt={setMisuCnt} setSeitouRitu={setSeitouRitu} setSahen={setSahen} setUhen={setUhen} setResults={setResults} setResult={setResult} />
       )}
     </div>
   );
