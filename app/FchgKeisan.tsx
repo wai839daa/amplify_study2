@@ -11,6 +11,7 @@ import outputs from "@/amplify_outputs.json";
 import "@aws-amplify/ui-react/styles.css";
 //import "@aws-amplify/ui-react/dist/styles.css";
 import { MutualAuthenticationMode } from "aws-cdk-lib/aws-elasticloadbalancingv2";
+import {com_read} from "./comfnc";
 
 Amplify.configure(outputs);
 const client = generateClient<Schema>();
@@ -24,7 +25,9 @@ interface AFrameProps {
 // 計算画面
 //export default function FchgKeisan({ userAnswer,setUserAnswer,memo,setMemo,handleGetServerTime,handleKeyDown,START,END,isRunning,startTime,endTime,diffTime,seikaiCnt,misuCnt,seitouRitu,sahen,uhen,results,result,onBack,setCurrentScreen,setStartTime,setEndTime,setDiffTime,setSeikaiCnt,setMisuCnt,setSeitouRitu,setSahen,setUhen,setResults,setResult }: AFrameProps) {
 //export default function FchgKeisan({ userAnswer,setUserAnswer,handleGetServerTime,handleKeyDown,START,END,isRunning,startTime,endTime,diffTime,seikaiCnt,misuCnt,seitouRitu,sahen,uhen,results,result,onBack,setCurrentScreen,setStartTime,setEndTime,setDiffTime,setSeikaiCnt,setMisuCnt,setSeitouRitu,setSahen,setUhen,setResults,setResult }: AFrameProps) {
+//const [results, setResults] = useState<Array<Schema["Result2"]["type"]>>([]);  
 export default function FchgKeisan({ onBack }: AFrameProps) {
+  const [results, setResults] = useState<Array<Schema["Result2"]["type"]>>([]);  
   const handleGetServerTime = async (flg:number=START|END) => {
     try {
       // DynamoDBではなく、AWSサーバーの関数をダイレクトに呼び出す！
@@ -50,7 +53,8 @@ export default function FchgKeisan({ onBack }: AFrameProps) {
         setEndTime(data?.time);
         setDiffTime(calcTime(data?.time, startTime));
         setIsRunning(false);
-        read2(startTime);
+        //read2(startTime);
+        setResults(await(com_read(startTime)));
       }
     } catch (error) {
       console.error("サーバー時刻の取得に失敗しました:", error);
@@ -61,13 +65,13 @@ export default function FchgKeisan({ onBack }: AFrameProps) {
 
 
   //DB内容を取得
+/*
   const [results, setResults] = useState<Array<Schema["Result2"]["type"]>>([]);  
 	async function read2(p_time: string) { //複数ページで返された場合を考慮
 		let allLists: any[] = [];
 		let currentToken: string | null | undefined = null;
 
 		do {
-//  	const { data: lists, errors, nextToken: nextTokenFromAWS  } = await client.models.Result2.list({ //左記の分割代入では、TypeScriptが型を正しく推論できない為、下の書き方に変え、一度オブジェクトとして結果を受け取る書き方に変えた。
 			const readResult:any = await client.models.Result2.list({
 				filter: {
 					createdAt: {
@@ -91,7 +95,7 @@ export default function FchgKeisan({ onBack }: AFrameProps) {
 		setResults(allLists);
 		calcAnserRate(allLists);
 	}
-
+*/
 
   async function read(p_time:string){
     console.log ('p_time==' + p_time);
