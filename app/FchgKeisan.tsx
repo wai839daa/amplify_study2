@@ -54,7 +54,10 @@ export default function FchgKeisan({ onBack }: AFrameProps) {
         setDiffTime(calcTime(data?.time, startTime));
         setIsRunning(false);
         //read2(startTime);
-        setResults(await(com_read(startTime)));
+        let allLists: Array<Schema["Result2"]["type"]> = await(com_read(startTime));
+//      setResults(await(com_read(startTime)));
+        setResults(allLists);
+        calcAnserRate(allLists);
       }
     } catch (error) {
       console.error("サーバー時刻の取得に失敗しました:", error);
@@ -97,23 +100,23 @@ export default function FchgKeisan({ onBack }: AFrameProps) {
 	}
 */
 
-  async function read(p_time:string){
-    console.log ('p_time==' + p_time);
-    const { data: lists, errors } = await client.models.Result2.list({
-    filter: {
-        createdAt: {
-          gt: p_time // 「指定時刻より大きい（以降）」という条件
-        },
-      }
-    });
-    limit: 1000 // 1回あたりの最大取得件数を増やす（ただし1MB制限は超えられない）
+  // async function read(p_time:string){
+  //   console.log ('p_time==' + p_time);
+  //   const { data: lists, errors } = await client.models.Result2.list({
+  //   filter: {
+  //       createdAt: {
+  //         gt: p_time // 「指定時刻より大きい（以降）」という条件
+  //       },
+  //     }
+  //   });
+  //   limit: 1000 // 1回あたりの最大取得件数を増やす（ただし1MB制限は超えられない）
       
-    if (errors) console.log("list関数_失敗:errors== " + errors + ",lists==" + lists);
-    else console.log("list関数_成功:", lists);
+  //   if (errors) console.log("list関数_失敗:errors== " + errors + ",lists==" + lists);
+  //   else console.log("list関数_成功:", lists);
   
-    setResults(lists);
-    calcAnserRate(lists);
-  };
+  //   setResults(lists);
+  //   calcAnserRate(lists);
+  // };
 
   //const targetTime = "2026-05-17T12:00:00.000Z"; 
   const [startTime, setStartTime] = useState<string | null>(null);
@@ -127,10 +130,10 @@ export default function FchgKeisan({ onBack }: AFrameProps) {
 
   //開始ボタン押下の処理
   //ローカル時刻取得の場合
-  const handleStartClick_local = () => {
-    const targetTime = new Date().toISOString() ;
-    setStartTime(targetTime);
-  };
+  // const handleStartClick_local = () => {
+  //   const targetTime = new Date().toISOString() ;
+  //   setStartTime(targetTime);
+  // };
 
   //サーバ時刻取得（開始、終了の共通処理)
 //OK const handleGetServerTime = async (cbfnc:Function) => {  //この書き方でも動くが、大文字のFunctionは、「何でもいいから関数全般」という意味の、非常に大雑把な型で、型安全ではなくなってしまうとのこと。下記がよい。
@@ -193,14 +196,14 @@ export default function FchgKeisan({ onBack }: AFrameProps) {
   };
 
   //終了ボタン押下の処理
-  const handleEndClick = () => {
-    if (!startTime){ //この判定を入れないと、後のread実行で、null型は不許可のコンパイルエラーとなる。
-      return;
-    }
-    const targetTime = new Date().toISOString() ;
-    setEndTime(targetTime);
-    read(startTime);
-  };
+  // const handleEndClick = () => {
+  //   if (!startTime){ //この判定を入れないと、後のread実行で、null型は不許可のコンパイルエラーとなる。
+  //     return;
+  //   }
+  //   const targetTime = new Date().toISOString() ;
+  //   setEndTime(targetTime);
+  //   read(startTime);
+  // };
 
 
   //上限、下限範囲のランダムな整数を返す関数
@@ -258,15 +261,15 @@ export default function FchgKeisan({ onBack }: AFrameProps) {
 
   };
 
-  async function write2(p_uhen:number, p_sahen:number, p_siki:string, p_seikai:number, p_answer:number){
-    const { data: newResult, errors } = await client.models.Todo.create({
-      content: 'TEST_' + p_uhen + '_' + p_sahen + '_' + p_siki + '_' + p_seikai + '_' + p_answer
-      // owner フィールドは自動で入るため、指定不要です
-    });
+  // async function write2(p_uhen:number, p_sahen:number, p_siki:string, p_seikai:number, p_answer:number){
+  //   const { data: newResult, errors } = await client.models.Todo.create({
+  //     content: 'TEST_' + p_uhen + '_' + p_sahen + '_' + p_siki + '_' + p_seikai + '_' + p_answer
+  //     // owner フィールドは自動で入るため、指定不要です
+  //   });
   
-    if (errors) console.log("write2_Toeo_作成失敗:errors== " + errors + ",newResult==" + newResult);
-    else console.log("write2_Todo_作成成功:", newResult);
-  };
+  //   if (errors) console.log("write2_Toeo_作成失敗:errors== " + errors + ",newResult==" + newResult);
+  //   else console.log("write2_Todo_作成成功:", newResult);
+  // };
 
 
   return (
