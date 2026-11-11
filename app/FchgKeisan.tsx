@@ -12,6 +12,9 @@ import "@aws-amplify/ui-react/styles.css";
 //import "@aws-amplify/ui-react/dist/styles.css";
 import { MutualAuthenticationMode } from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import {com_read} from "./comfnc";
+import {com_getRandomInt} from "./comfnc";
+import {com_write} from "./comfnc";
+import {com_calcTime} from "./comfnc";
 
 Amplify.configure(outputs);
 const client = generateClient<Schema>();
@@ -47,11 +50,11 @@ export default function FchgKeisan({ onBack }: AFrameProps) {
         setDiffTime(null);
         setResults([]);
         setIsRunning(true);
-        setSahen(getRandomInt());
-        setUhen(getRandomInt());
+        setSahen(com_getRandomInt());
+        setUhen(com_getRandomInt());
       }else if(startTime != null){
         setEndTime(data?.time);
-        setDiffTime(calcTime(data?.time, startTime));
+        setDiffTime(com_calcTime(data?.time, startTime));
         setIsRunning(false);
         //read2(startTime);
         let allLists: Array<Schema["Result2"]["type"]> = await(com_read(startTime));
@@ -139,21 +142,21 @@ export default function FchgKeisan({ onBack }: AFrameProps) {
 //OK const handleGetServerTime = async (cbfnc:Function) => {  //この書き方でも動くが、大文字のFunctionは、「何でもいいから関数全般」という意味の、非常に大雑把な型で、型安全ではなくなってしまうとのこと。下記がよい。
   const START:number=0;
   const END:number=1;
-  const calcTime = (et:string, st:string):string => {
-    //時刻型に変換
-    const dte = new Date(et);
-    const dts = new Date(st);
+  // const calcTime = (et:string, st:string):string => {
+  //   //時刻型に変換
+  //   const dte = new Date(et);
+  //   const dts = new Date(st);
 
-    //ミリ秒計算
-    const diffMs = dte.getTime() - dts.getTime();
+  //   //ミリ秒計算
+  //   const diffMs = dte.getTime() - dts.getTime();
 
-    // ミリ秒を時間（時間・分・秒）に変換
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-    const diffSec = Math.floor((diffMs % (1000 * 60)) / 1000);
+  //   // ミリ秒を時間（時間・分・秒）に変換
+  //   const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  //   const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+  //   const diffSec = Math.floor((diffMs % (1000 * 60)) / 1000);
 
-    return diffHours + ":" + diffMins+ ":" + diffSec ;
-  }
+  //   return diffHours + ":" + diffMins+ ":" + diffSec ;
+  // }
   
   //結果情報より、正答率を算出、設定する。
   type Result2Item = Schema["Result2"]["type"];//Schema型のResult2テーブルの1レコード(複数項目を持つ)の型 (resources.ts参照)
@@ -207,14 +210,14 @@ export default function FchgKeisan({ onBack }: AFrameProps) {
 
 
   //上限、下限範囲のランダムな整数を返す関数
-  const KAGEN:number = 1;
-  const JOUGEN:number = 100;
+  // const KAGEN:number = 1;
+  // const JOUGEN:number = 100;
   
-  function getRandomInt(min:number=KAGEN, max:number=JOUGEN) :number {
-    const minCeiled = Math.ceil(min);
-    const maxFloored = Math.floor(max);
-    return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled); // 上限は除き、下限は含む
-  }
+  // function getRandomInt(min:number=KAGEN, max:number=JOUGEN) :number {
+  //   const minCeiled = Math.ceil(min);
+  //   const maxFloored = Math.floor(max);
+  //   return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled); // 上限は除き、下限は含む
+  // }
 
   // 1. 各値を状態（State）として定義
   const [sahen, setSahen] = useState(0);  // 左辺（例: 5）
@@ -230,10 +233,10 @@ export default function FchgKeisan({ onBack }: AFrameProps) {
         const seikai = sahen + uhen;
         const isCorrect = Number(userAnswer) === seikai;
         setResult(isCorrect ? "正解！ 回答="+ userAnswer : "残念、不正解...正解=" + seikai +"、回答="+ userAnswer);
-        write(sahen,uhen,'+',seikai,Number(userAnswer));
+        com_write(sahen,uhen,'+',seikai,Number(userAnswer));
 //      write2(sahen,uhen,'+',seikai,Number(userAnswer));
-        setSahen(getRandomInt());
-        setUhen(getRandomInt());
+        setSahen(com_getRandomInt());
+        setUhen(com_getRandomInt());
         setUserAnswer("");
       //  read (startTime);
       }
@@ -241,25 +244,25 @@ export default function FchgKeisan({ onBack }: AFrameProps) {
   };
 
   // 3. 書き込み
-  async function write(p_uhen:number, p_sahen:number, p_siki:string, p_seikai:number, p_answer:number){
-    console.log ('p_uhen==' + p_uhen);
-    console.log (',p_sahen==' + p_sahen);
-    console.log (',p_siki==' + p_siki);
-    console.log (',p_seikai==' + p_seikai);
-    console.log (',p_answer==' + p_answer);
-    const { data: newResult, errors } = await client.models.Result2.create({
-      uhen: p_uhen,
-      saen: p_sahen,
-      siki: p_siki,
-      seikai: p_seikai,
-      answer: p_answer,
-      // owner フィールドは自動で入るため、指定不要です
-    });
+  // async function write(p_uhen:number, p_sahen:number, p_siki:string, p_seikai:number, p_answer:number){
+  //   console.log ('p_uhen==' + p_uhen);
+  //   console.log (',p_sahen==' + p_sahen);
+  //   console.log (',p_siki==' + p_siki);
+  //   console.log (',p_seikai==' + p_seikai);
+  //   console.log (',p_answer==' + p_answer);
+  //   const { data: newResult, errors } = await client.models.Result2.create({
+  //     uhen: p_uhen,
+  //     saen: p_sahen,
+  //     siki: p_siki,
+  //     seikai: p_seikai,
+  //     answer: p_answer,
+  //     // owner フィールドは自動で入るため、指定不要です
+  //   });
   
-    if (errors) console.log("Result2_作成失敗:errors== " + errors + ",newResult==" + newResult);
-    else console.log("Result2_作成成功:", newResult);
+  //   if (errors) console.log("Result2_作成失敗:errors== " + errors + ",newResult==" + newResult);
+  //   else console.log("Result2_作成成功:", newResult);
 
-  };
+  // };
 
   // async function write2(p_uhen:number, p_sahen:number, p_siki:string, p_seikai:number, p_answer:number){
   //   const { data: newResult, errors } = await client.models.Todo.create({
