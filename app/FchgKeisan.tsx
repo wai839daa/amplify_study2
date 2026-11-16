@@ -321,11 +321,11 @@ export default function FchgKeisan({ onBack }: AFrameProps) {
           {result}
         </div>
       
-        <ul>
+        <ul style={{height:'150px', overflow: 'auto'}}>
             {results.map((result2) => (
               <li key={result2.id}>{result2.saen + ' ' + result2.siki + ' ' + result2.uhen + ' = ' + result2.answer + '＜' + result2.seikai + '＞' + ((result2.answer == result2.seikai) ? '正解！' : '残念、不正解')}</li>
             ))}
-          </ul>
+        </ul>
 
       </div>
       
